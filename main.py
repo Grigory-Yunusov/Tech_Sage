@@ -76,13 +76,6 @@ class Record:
     def remove_phone(self, phone):
         self.phones = list(filter(lambda p: p.value != phone, self.phones))
 
-        # self.phones = [p for p in self.phones if p.value != phone]
-
-        # for p in self.phones:
-        #     if p.value == phone:
-        #         self.phones.remove(p)
-        #         break
-
     def edit_phone(self, old_phone, new_phone):
         for p in self.phones:
             if p.value == old_phone:
@@ -99,9 +92,6 @@ class Record:
 
     def __str__(self):
         return f"Record(name={self.name.value}, birthday={self.birthday}, phones={[phone.value for phone in self.phones]})"
-
-    # def __str__(self):
-    #     return f"Contact name: {self.name._value}, phones: {'; '.join(p.value for p in self.phones)}"
 
     def days_to_birthday(self):
         if not self.birthday:
@@ -186,16 +176,7 @@ class AddressBook(UserDict):
 
         matching_records.extend(record for record in self.data.values() if term.lower() in record.name.value.lower())
         return matching_records
-
-
-    # if __name__ == "__main__":
-    #
-    #     def find(self, term):
-    #         matching_records = self.find_by_term(term)
-    #         if matching_records:
-    #             return matching_records
-    #         else:
-    #             return None
+        
 
 class Controller(cmd.Cmd):
     def __init__(self):
@@ -256,7 +237,7 @@ class Controller(cmd.Cmd):
         else:
             print("Ничего не найдено!!!.")
 
-    def do_birthday(self, line):
+    def do_birthday(self, line): # >>>birthday John (до дня народження контакту John, залишилось 354 днів)
         name = line.strip().capitalize()
         record = self.book.find(name)
         if record:
@@ -340,25 +321,3 @@ if __name__ == "__main__":
         for record in item:
             print(record)
 
-    # record_with_birthday = Record("John", "2023-01-15")
-    # days_until_birthday = record_with_birthday.days_to_birthday()
-    # print(f"До дня народження залишилось {days_until_birthday} днів.")
-    #
-    # print(">>>>>>>>>>>>>>>>")
-    #
-    # search_term_1 = "7575"
-    # results_1 = controller.book.find(search_term_1)
-    #
-    # print(f"результат для пошуку: '{search_term_1}':")
-    # for result in results_1:
-    #     print(result)
-
-
-
-# Ласкаво просимо до Адресної Книги
-# >>>add ron,1234567890,1992-12-12
-# помилка при створенні контакту: Phone must be a string containing only digits.
-# >>>add ron, 1234567890,0987654321
-# Новий контакт успішно збережено!
-# >>>add roki, 1234567890,0987654321, 1992-12-12
-# Новий контакт успішно збережено!
