@@ -321,3 +321,27 @@ if __name__ == "__main__":
         for record in item:
             print(record)
 
+
+
+
+#создание таблиц через РИЧ
+
+from rich.console import Console
+from rich.table import Table
+from datetime import datetime
+console = Console()
+
+table = Table(show_header=True, header_style="bold magenta")
+table.add_column('Author')            #создание колонок
+table.add_column("Title")
+table.add_column("Note")
+table.add_column("Date", style="dim", width=12)
+now = datetime.now()                       #берем текущую дату. её надо ещё форматировать чтобы выглядела красиво
+author = input('Input Author:  ')             # Ввод данныз в таблицу через инпуты. 
+title = input('Input Title: ')
+note = input('Input note: ')
+table.add_row(author, title, note, str(now)        #эта функция принимает только строку поэтому время перевести в строку
+)
+
+
+console.print(table)                  # Вывод на консоль
