@@ -285,7 +285,7 @@ class Controller(cmd.Cmd):
             return
         data = line.split(",", 1)
         if len(data) != 2:
-            print("Для команди add_birthday потрібно вказати ім'я та дату народження.")
+            print("Для команди add_birthday потрібно вказати ім'я та дату народження через кому.")
             return
         name, birthday_str = map(str.strip, data)
         name = name.capitalize()  # Ensure that the name's first letter is capital
@@ -299,7 +299,7 @@ class Controller(cmd.Cmd):
             record.add_birthday(birthday_str)
             print(f"День народження {birthday_str} додано для контакта {name}.")
         except ValueError as e:
-            print(f"Помилка при додаванні дні народження: {e}")
+            print(f"Помилка при додаванні дня народження: {e}")
 
     def do_list_book(self, arg):
         if not self.book.data:
@@ -331,21 +331,33 @@ class Controller(cmd.Cmd):
         else:
             print("Ничего не найдено!!!.")
 
-    def do_days_to_birthday(self, line):
+    def do_days_to_birthday(self, line, when=9999):
         name = line.strip().capitalize()
         record = self.book.find(name)
         if record:
             days_until_birthday = record.days_to_birthday()
-            if days_until_birthday > 0:
-                print(f"до дня народження контакту {name}, залишилось {days_until_birthday} днів")
+            if 0 < days_until_birthday < when:
+                print(f"До дня народження {name} {record.birthday} залишилось {days_until_birthday} днів")
             elif days_until_birthday == 0:
-                print(f"День народження контакту {name} сьогодні!!!")
+                print(f"День народження {name} сьогодні!!!")
+            elif (days_until_birthday > when or days_until_birthday == -1) and (when != 9999):
+                pass
             else:
-                print(f"день народження не додано в книгу контактів")
+                print(f"День народження не додано в книгу контактів")
 
         else:
             print(f"контакт {name} не знайдений")
 
+    def do_when (self, days):
+        if not days:
+            print ("Введіть 'when' та кількість днів, на які хочете побачити прогноз")
+            return
+        if not days.isdigit():
+            print ("Введіть кількість днів числовим значенням")
+            return
+        for record in self.book:
+            self.do_days_to_birthday (record.name.value, int(days))
+    
     def do_add_note(self, line):
         data = line.split(',')
         if len(data) < 2:
