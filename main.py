@@ -13,6 +13,8 @@ from prompt_toolkit.validation import Validator, ValidationError
 from rich.console import Console
 from rich.table import Table
 import re
+from sort_files import run
+
 console = Console()
 
 
@@ -280,7 +282,7 @@ class Controller():
 
     def do_add_name(self):
         line = input("Введіть: <Ім'я>: ")
-        name = line.strip().capitalize()
+        name = line.strip().title()
 
         if name in self.book:
             print(f"Контакт з іменем {name} вже існує.")
@@ -295,7 +297,7 @@ class Controller():
 
     def do_add_phone(self, name, phone):
     
-        record = self.book.get(name.capitalize())
+        record = self.book.get(name.title())
 
         if not record:
             print(f"Контакт з іменем {name} не знайдено.")
@@ -308,7 +310,7 @@ class Controller():
             print(f"Помилка при додаванні телефону: {e}")
 
     def do_add_birthday(self, name, birthday_str):
-        name = name.capitalize()  # Ensure that the name's first letter is capital
+        name = name.title()  # Ensure that the name's first letter is capital
         record = self.book.get(name)
 
         if not record:
@@ -322,7 +324,7 @@ class Controller():
             print(f"Помилка при додаванні дні народження: {e}")
 
     def do_add_email(self, name):
-        record = self.book.get(name.capitalize())
+        record = self.book.get(name.title())
         if not record:
             print(f"Контакт з іменем {name} не знайдено.")
             return
@@ -334,7 +336,7 @@ class Controller():
             print(f"Помилка при додаванні email: {e}")
 
     def do_add_address(self, name):
-        record = self.book.get(name.capitalize())
+        record = self.book.get(name.title())
         if not record:
             print(f"Контакт з іменем {name} не знайдено.")
             return
@@ -393,7 +395,7 @@ class Controller():
             print("Ничего не найдено!!!.")
 
     def do_days_to_birthday(self, line):
-        name = line.strip().capitalize()
+        name = line.strip().title()
         record = self.book.find(name)
         if record:
             days_until_birthday = record.days_to_birthday()
@@ -423,7 +425,7 @@ class Controller():
         print(f"Заметка додана до контакта {name}.")
 
     def do_find_note(self, line):
-        name = line.strip().capitalize()
+        name = line.strip().title()
         record = self.book.data.get(name)
         if not record:
             print(f"Контакт з ім'ям {name} не знайдено.")
@@ -449,6 +451,25 @@ class Controller():
 
     def do_edit_note(self, line):
         pass
+
+    def do_sort_files(self, line):
+        if not line:
+            print("Введіть шлях до папки, яку треба сортувати")
+            return
+        try:
+            run (line)
+        except FileNotFoundError:
+            print ('Така папка не існує на диску. Можливо треба ввести повний шлях\n')
+
+    def do_when (self, days):
+        if not days:
+            print ("Введіть 'when' та кількість днів, на які хочете побачити прогноз")
+            return
+        if not days.isdigit():
+            print ("Введіть кількість днів числовим значенням")
+            return
+        for record in self.book:
+            self.do_days_to_birthday (record.name.value, int(days))
 
 
 class CommandValidator(Validator):
@@ -543,7 +564,9 @@ def handle_command(command):
          return controller.do_save()
          
 def main():
+    controller.do_load()
     print("Ласкаво просимо до Адресної Книги")
+
     while True:
         
         command_interpreter = NestedCompleter.from_nested_dict({
@@ -563,6 +586,10 @@ def main():
                 'delete_all_notes': None,
                 'add_email': None,
                 'add_address': None,
+                'when': None,
+                'edit_note': None,
+                'sort_files': None,
+                'help': None,
                 })    
             
         user_input = prompt('Enter command: ', completer=command_interpreter, validator=CommandValidator(), validate_while_typing=False)
