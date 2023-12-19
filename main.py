@@ -421,7 +421,7 @@ class Controller():
         if not days.isdigit():
             print ("Введіть кількість днів додатнім числовим значенням")
             return
-        for record in self.book:
+        for record in self.book.values():
             self.do_days_to_birthday (record.name.value, int(days)) 
 
     def do_add_note(self, name):
