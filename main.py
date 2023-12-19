@@ -280,22 +280,22 @@ class Controller():
         self.book.load()
         print("Адресна книга відновлена")
 
-    def do_add(self, line):
-        data = line.split(",")
-        name = data[0].strip().capitalize()
-        phones = [phone.strip() for phone in data[1:3]]
-        birthday = data[3].strip() if len(data) > 3 else None
-        try:
-            record = Record(name)
-            for phone in phones:
-                record.add_phone(phone)
-            if birthday:
-                record.add_birthday(birthday)
+     def do_add_name(self, line):
+        if not line:
+            print("Введіть: add_name Ім'я")
+            return
+        name = line.strip().capitalize()
 
+        if name in self.book:
+            print(f"Контакт з іменем {name} вже існує.")
+            return
+
+        try:
+            record = NoteRecord(name)
             self.book.add_record(record)
-            print("Новий контакт успішно збережено!")
+            print(f"Контакт з іменем {name} успішно створено.")
         except ValueError as e:
-            print(f"помилка при створенні контакту: {e}")
+            print(f"Помилка при створенні контакту: {e}")
 
     def do_add_phone(self, name, phone):
     
