@@ -365,7 +365,7 @@ class Controller():
             print("Адресна книга порожня.")
         else:
             table = Table(show_header=True, header_style="bold magenta")
-            table.add_column('ID')
+#            table.add_column('ID')
             table.add_column('Name')
             table.add_column("Phone")
             table.add_column("Address")
@@ -377,7 +377,7 @@ class Controller():
 #                print(f"{record_id}: {record.name.value}, {phones}{birthday_info}")
                 address_info = record.address.value if record.address else ""
                 email_info = record.email.value if record.email else ""
-                table.add_row(record_id, record.name.value, phones, address_info, email_info, birthday_info)
+                table.add_row(record.name.value, phones, address_info, email_info, birthday_info)
                 table.add_section()
             console.print(table)
 
