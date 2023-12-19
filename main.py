@@ -250,13 +250,14 @@ class NoteRecord(Record):
             raise ValueError("Введіть нотаток!")
         self.notes = [note for note in self.notes if note.value != text]
 
-    def edit_note(self, old_text, new_text, new_tags=None):
-        for note in self.notes:
-            if note.value == old_text:
-                note.value = new_text
-                if new_tags is not None:
-                    note.tags = new_tags
-                break
+    def edit_note(self, new_text, new_tags=None):
+        now = datetime.now()
+        date = now.strftime("%Y-%m-%d %H:%M:%S")
+        for idx, a in enumerate(self.notes):
+            if new_text:
+                note = new_text
+                tags = new_tags
+                self.notes[idx] = Note(note, date, tags) 
 
     def find_notes_by_tag(self, tag):
         return [note for note in self.notes if tag in note.teg]
@@ -470,8 +471,17 @@ class Controller():
         else:
             print("Контакт не знайдено.")
 
+    
+
     def do_edit_note(self, line):
-        pass
+        record = self.book.data.get(line)
+        if record is None:
+            print(f"Контакт з ім'ям {line} не знайдено.")
+            return
+        new_text= input("Введіть нову нотатку: ")
+        new_tags = input("Введіть нови тег: ")
+        record.edit_note(new_text, new_tags)
+        print("Примітка успішно відредагована.")
 
     def do_sort_files(self, line):
         if not line:
@@ -517,7 +527,12 @@ class CommandValidator(Validator):
             x = text.split(" ")
             if len(x) != 2:
                 raise ValidationError(message="Введіть: дані для пошуку", cursor_position=len(text))
-
+            
+        if text.startswith("edit_note"):
+            x = text.split(" ")
+            if len(x) != 2:
+                raise ValidationError(message="Введіть: <Ім'я>", cursor_position = len(text))
+            
         if text.startswith("delete_all_notes"):
             x = text.split(" ")
             if len(x) != 2:
@@ -559,7 +574,7 @@ def handle_command(command):
         return controller.do_list_note()
     elif command.lower().startswith("find_info"):
         _, line = command.split(" ")
-        return controller.do_find(line)
+        return controller.do_find_info(line)
     elif command.lower().startswith("days_to_birthday"):
         _, name = command.split(" ")
         return controller.do_days_to_birthday(name)
@@ -572,6 +587,9 @@ def handle_command(command):
     elif command.lower().startswith("find_note"):
         _, name = command.split(" ")
         return controller.do_find_note(name)
+    elif command.lower().startswith("edit_note"):
+         _, name = command.split(" ")
+         return controller.do_edit_note(name)
     elif command.lower().startswith("delete_all_notes"):
         _, name = command.split(" ")
         return controller.do_delete_all_notes(name)
