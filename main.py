@@ -307,13 +307,14 @@ class Controller():
         except ValueError as e:
             print(f"Помилка при створенні контакту: {e}")
 
-    def do_add_phone(self, name, phone):
+    def do_add_phone(self, name):
 
         record = self.book.get(name.title())
 
         if not record:
             print(f"Контакт з іменем {name} не знайдено.")
             return
+        phone = input ('Введіть номер телефону: 10 цифр:  ')
 
         try:
             record.add_phone(phone)
@@ -321,14 +322,14 @@ class Controller():
         except ValueError as e:
             print(f"Помилка при додаванні телефону: {e}")
 
-    def do_add_birthday(self, name, birthday_str):
+    def do_add_birthday(self, name):
         name = name.title()  # Ensure that the name's first letter is capital
-        record = self.book.get(name)
+        record = self.book.get(name.title())
 
         if not record:
             print(f"Контакт з іменем {name} не знайдено.")
             return
-
+        birthday_str = input ('Введіть дату дня народження у форматі РРРР-ММ-ДД:  ')
         try:
             record.add_birthday(birthday_str)
             print(f"День народження {birthday_str} додано для контакта {name}.")
@@ -487,14 +488,16 @@ class CommandValidator(Validator):
         text = document.text
         if text.startswith("add_phone"):
             x = text.split(" ")
-            if len(x) != 3:
-                raise ValidationError(message="Введіть: <Ім'я> <Телефон>", cursor_position=len(text))
-            if (not x[2].isdigit()):
-                raise ValidationError(message='Телефон повинен складатися з цифр', cursor_position=len(text))
+            if len(x) != 2:
+                raise ValidationError(message="Введіть: <Ім'я>", cursor_position=len(text))
+#            if (not x[2].isdigit()):
+#                raise ValidationError(message='Телефон повинен складатися з цифр', cursor_position=len(text))
+
         if text.startswith("add_birthday"):
             x = text.split(" ")
-            if len(x) != 3:
-                raise ValidationError(message="Введіть: <Ім'я> <датa народження>.", cursor_position=len(text))
+            if len(x) != 2:
+                raise ValidationError(message="Введіть: <Ім'я>", cursor_position=len(text))
+
         if text.startswith("find_info"):
             x = text.split(" ")
             if len(x) == 1:
@@ -537,8 +540,8 @@ def handle_command(command):
     elif command.lower().startswith("help"):
         return controller.do_help()
     elif command.lower().startswith("add_phone"):
-        _, name, phone = command.split(" ")
-        return controller.do_add_phone(name, phone)
+        _, name = command.split(" ")
+        return controller.do_add_phone(name)
     elif command.lower().startswith("add_email"):
         _, line = command.split(" ")
         return controller.do_add_email(line)
@@ -546,8 +549,8 @@ def handle_command(command):
         _, line = command.split(" ")
         return controller.do_add_address(line)
     elif command.lower().startswith("add_birthday"):
-        _, name, birthday = command.split(" ")
-        return controller.do_add_birthday(name, birthday)
+        _, name = command.split(" ")
+        return controller.do_add_birthday(name)
     elif command.lower().startswith("list_book"):
         return controller.do_list_book()
     elif command.lower().startswith("load"):
