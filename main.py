@@ -122,7 +122,6 @@ class Record:
 
     def add_email(self, email):
         email_field = Email(email)
-        email_field.validate()
         self.email = email_field
 
     def add_address(self, address):
@@ -345,7 +344,7 @@ class Controller():
         try:
             record.add_email(email)
             print(f"Email {email} додано до контакта {name}.")
-        except ValueError as e:
+        except IndexError as e:
             print(f"Помилка при додаванні email: {e}")
 
     def do_add_address(self, name):
