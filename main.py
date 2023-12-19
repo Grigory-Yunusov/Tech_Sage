@@ -398,7 +398,7 @@ class Controller():
                         table.add_section()
             console.print(table)
 
-    def do_find(self, line):
+    def do_find_info(self, line):
         matching_records = self.book.find_by_term(line)
         if matching_records:
             for record in matching_records:
@@ -435,17 +435,18 @@ class Controller():
             self.do_days_to_birthday (record.name.value, int(days)) 
 
     def do_add_note(self, name):
-        record = self.book.data.get(name)
+        name_normal = name.strip().title()
+        record = self.book.data.get(name_normal)
         if record is None:
-            print(f"Контакт з ім'ям {name} не знайдено.")
+            print(f"Контакт з ім'ям {name_normal} не знайдено.")
             return
         if not isinstance(record, NoteRecord):
-            print(f"Для контакта {name} не підтримуються нотатки.")
+            print(f"Для контакта {name_normal} не підтримуються нотатки.")
             return
         note_text = input('Введіть нотатку: ')
         tags = input('Введіть теги: ')
         record.add_note(note_text, tags)
-        print(f"Заметка додана до контакта {name}.")
+        print(f"Заметка додана до контакта {name_normal}.")
 
     def do_find_note(self, line):
         name = line.strip().title()
@@ -461,11 +462,12 @@ class Controller():
 
     def do_delete_all_notes(self, line):
         name = input("Введіть ім'я для видалення всіх нотаток: ")
-        if name in self.book:
-            record = self.book[name]
+        name_normal = name.strip().title()
+        if name_normal in self.book:
+            record = self.book[name_normal]
             if isinstance(record, NoteRecord):
                 record.notes.clear()
-                print(f"Усі нотатки для {name} було видалено.")
+                print(f"Усі нотатки для {name_normal} було видалено.")
             else:
                 print("Для цього контакта нотатки не підтримуються.")
         else:
@@ -474,9 +476,10 @@ class Controller():
     
 
     def do_edit_note(self, line):
-        record = self.book.data.get(line)
+        name = line.strip().title()
+        record = self.book.data.get(name)
         if record is None:
-            print(f"Контакт з ім'ям {line} не знайдено.")
+            print(f"Контакт з ім'ям {name} не знайдено.")
             return
         new_text= input("Введіть нову нотатку: ")
         new_tags = input("Введіть нови тег: ")
@@ -511,12 +514,12 @@ class CommandValidator(Validator):
         if text.startswith("find_info"):
             x = text.split(" ")
             if len(x) == 1:
-                raise ValidationError(message="Введіть: дані для пошуку", cursor_position=len(text))
+                raise ValidationError(message="Введіть: <Ім'я> для пошуку", cursor_position=len(text))
 
         if text.startswith("days_to_birthday"):
             x = text.split(" ")
             if len(x) != 2:
-                raise ValidationError(message='Введіть: дані для пошуку', cursor_position=len(text))
+                raise ValidationError(message="Введіть: <Ім'я> для пошуку", cursor_position=len(text))
 
         if text.startswith("add_note"):
             x = text.split(" ")
@@ -526,7 +529,7 @@ class CommandValidator(Validator):
         if text.startswith("find_note"):
             x = text.split(" ")
             if len(x) != 2:
-                raise ValidationError(message="Введіть: дані для пошуку", cursor_position=len(text))
+                raise ValidationError(message="Введіть: <Ім'я> для пошуку", cursor_position=len(text))
             
         if text.startswith("edit_note"):
             x = text.split(" ")
