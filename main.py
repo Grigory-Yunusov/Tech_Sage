@@ -296,17 +296,22 @@ class Controller():
         print('Після введення команди натисни Enter')
 
     def do_add_name(self):
-        line = input("Введіть: <Ім'я>: ")
-        name = line.strip().title()
-        if name in self.book:
-            print(f"Контакт з іменем {name} вже існує.")
-            return
-        try:
-            record = NoteRecord(name)
-            self.book.add_record(record)
-            print(f"Контакт з іменем {name} успішно створено.")
-        except ValueError as e:
-            print(f"Помилка при створенні контакту: {e}")
+        while True:
+            line = input("Введіть: <Ім'я>: ")
+            if not line:
+                print("Будь ласка введіть: <Ім'я>: ")
+                continue
+            name = line.strip().title()
+            if name in self.book:
+                print(f"Контакт з іменем {name} вже існує.")
+                return
+            try:
+                record = NoteRecord(name)
+                self.book.add_record(record)
+                print(f"Контакт з іменем {name} успішно створено.")
+                break
+            except ValueError as e:
+                print(f"Помилка при створенні контакту: {e}")
 
     def do_add_phone(self, name):
 
