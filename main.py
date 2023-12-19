@@ -16,25 +16,29 @@ import re
 from sort_files import run
 
 console = Console()
-COMMANDS = {'exit': ['exit', 'Вихід із програми'],
-            'add_name': ['command', 'description'],
-            'add_phone': ['command', 'description'],
-            'add_birthday': ['command', 'description'],
-            'list_book': ['command', 'description'],
-            'load': ['command', 'description'],
-            'list_note': ['command', 'description'],
-            'find_info': ['command', 'description'],
-            'days_to_birthday': ['command', 'description'],
-            'add_note': ['command', 'description'],
-            'save': ['command', 'description'],
-            'find_note': ['command', 'description'],
-            'delete_all_notes': ['command', 'description'],
-            'add_email': ['command', 'description'],
-            'add_address': ['command', 'description'],
-            'when': ['command', 'description'],
-            'edit_note': ['command', 'description'],
-            'sort_files': ['command', 'description'],
-            'help': ['command', 'description']}
+COMMANDS = {'add_name': ['add_name ___', 'Додавання нового контакту ____ у довідник'],
+            'add_phone': ['add_phone ____', 'Додавання телефонного номеру до контакту ___.\nКожен контакт може мати кілька номерів'],
+            'add_birthday': ['add_birthday', 'Додавання для контакта __ дня народження у форматі РРРР-ММ-ДД'],
+            'add_email': ['add_email', 'Додавання адреси електроної пошти для контакта ___'],
+            'add_address': ['add_address', 'Додавання адреси для контакта ___'],
+            'find_info': ['find_info text', "Пошук рядку 'text' у всіх полях телефонного довідника"],
+            'list_book': ['list_book', 'Вивід на екран телефонного довідника'],
+
+            'add_note': ['command', 'Додавання нотатки для контакту ____'],
+            'find_note': ['command', 'Пошук у нотатках рядку ____'],
+            'list_note': ['command', 'Вивід на екран усіх нотаток'],
+            'edit_note': ['command', 'Коригування нотаток'],
+            'delete_all_notes': ['command', 'Видалення усіх нотаток'],
+
+            'days_to_birthday': ['days_to_birthday Name', 'Розрахунок залишку днів до дня народження контакта "Name"'],
+            'when': ['when Number', 'Виводить на екран список контактів, у яких день народження впродовж "Number" днів від сьогодні'],
+            'sort_files': ['sort_files Path', 'Сортує файли у папці "Path" на вашому диску по папках в залежності від типу файлу'],
+
+            'help': ['help', 'Виклик довідника команд, що вміє цей бот'],
+            'load': ['load', 'Завантаження довідника з файла на диску. \nПерезапише зміни, що були внесені та не збережені у файл.\nТакож відбувається автоматично при запуску програми'],
+            'save': ['save', 'Зберігання змін у довіднику у файл на диску.\nТакож відбувається автоматично при закінченні роботи з програмою'],
+            'exit': ['exit', 'Вихід із програми із автоматичним записом змін у файл'],
+}
 
 class Field:
     def __init__(self, value):
@@ -369,8 +373,13 @@ class Controller():
             table.add_column("Birthdays")
             for record_id, record in self.book.data.items():
                 phones = '; '.join(str(phone) for phone in record.phones)
-                birthday_info = f", День народження: {record.birthday.value}" if record.birthday else ""
-                print(f"{record_id}: {record.name.value}, {phones}{birthday_info}")
+                birthday_info = record.birthday.value if record.birthday else ""
+#                print(f"{record_id}: {record.name.value}, {phones}{birthday_info}")
+                address_info = record.address.value if record.address else ""
+                email_info = record.email.value if record.email else ""
+                table.add_row(record_id, record.name.value, phones, address_info, email_info, birthday_info)
+                table.add_section()
+            console.print(table)
 
     def do_list_note(self):
         if not self.book.data:
@@ -421,7 +430,7 @@ class Controller():
         if not days.isdigit():
             print ("Введіть кількість днів додатнім числовим значенням")
             return
-        for record in self.book:
+        for record in self.book.values():
             self.do_days_to_birthday (record.name.value, int(days)) 
 
     def do_add_note(self, name):
@@ -580,28 +589,6 @@ def main():
         for command in COMMANDS.keys():
             commands_for_interp[command] = None
         command_interpreter = NestedCompleter.from_nested_dict(commands_for_interp)
-        #            {
-        #
-        #                'exit': None,
-        #                'add_name': None,
-        #                'add_phone': None,
-        #                'add_birthday': None,
-        #                'list_book': None,
-        #                'load': None,
-        #                'list_note': None,
-        #                'find_info': None,
-        #                'days_to_birthday': None,
-        #                'add_note': None,
-        #                'save': None,
-        #                'find_note': None,
-        #                'delete_all_notes': None,
-        #                'add_email': None,
-        #                'add_address': None,
-        #                'when': None,
-        #                'edit_note': None,
-        #                'sort_files': None,
-        #                'help': None,
-        #                })
 
         user_input = prompt('Enter command: ', completer=command_interpreter, validator=CommandValidator(),
                             validate_while_typing=False)
