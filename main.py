@@ -24,11 +24,11 @@ COMMANDS = {'add_name': ['add_name ___', 'Додавання нового кон
             'find_info': ['find_info text', "Пошук рядку 'text' у всіх полях телефонного довідника"],
             'list_book': ['list_book', 'Вивід на екран телефонного довідника'],
 
-            'add_note': ['command', 'Додавання нотатки для контакту ____'],
-            'find_note': ['command', 'Пошук у нотатках рядку ____'],
-            'list_note': ['command', 'Вивід на екран усіх нотаток'],
-            'edit_note': ['command', 'Коригування нотаток'],
-            'delete_all_notes': ['command', 'Видалення усіх нотаток'],
+            'add_note': ['add_note', 'Додавання нотатки для контакту ____'],
+            'find_note': ['find_note', 'Пошук у нотатках рядку ____'],
+            'list_note': ['list_note', 'Вивід на екран усіх нотаток'],
+            'edit_note': ['edit_note', 'Коригування нотаток'],
+            'delete_all_notes': ['delete_all_notes', 'Видалення усіх нотаток'],
 
             'days_to_birthday': ['days_to_birthday Name', 'Розрахунок залишку днів до дня народження контакта "Name"'],
             'when': ['when Number', 'Виводить на екран список контактів, у яких день народження впродовж "Number" днів від сьогодні'],
@@ -292,6 +292,7 @@ class Controller():
 
         for commands in COMMANDS.values():
             table.add_row(commands[0], commands[1])
+            table.add_section()
         console.print(table)
         print('Після введення команди натисни Enter')
 
