@@ -526,6 +526,11 @@ class CommandValidator(Validator):
             if len(x) != 2:
                 raise ValidationError(message="Введіть: <Ім'я> для пошуку", cursor_position=len(text))
 
+        if text.startswith("when"):
+            x = text.split(" ")
+            if len(x) != 2:
+                raise ValidationError(message="Введіть: кількість днів для пошуку", cursor_position=len(text))
+
         if text.startswith("add_note"):
             x = text.split(" ")
             if len(x) != 2:
