@@ -200,8 +200,8 @@ class AddressBook(UserDict):
             return None
 
     def delete_record(self, name):
-        if name in self.data:
-            del self.data[name]
+        if name.name.value in self.data:
+            del self.data[name.name.value]
 
     def iterator(self, item_number):
         counter = 0
