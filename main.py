@@ -16,16 +16,18 @@ import re
 from sort_files import run
 
 console = Console()
-COMMANDS = {'add_name': ['add_name ___', 'Додавання нового контакту ____ у довідник'],
-            'add_phone': ['add_phone ____', 'Додавання телефонного номеру до контакту ___.\nКожен контакт може мати кілька номерів'],
-            'add_birthday': ['add_birthday', 'Додавання для контакта __ дня народження у форматі РРРР-ММ-ДД'],
-            'add_email': ['add_email', 'Додавання адреси електроної пошти для контакта ___'],
-            'add_address': ['add_address', 'Додавання адреси для контакта ___'],
-            'find_info': ['find_info text', "Пошук рядку 'text' у всіх полях телефонного довідника"],
+COMMANDS = {'add_name': ['add_name', 'Додавання нового контакту у довідник'],
+            'add_phone': ['add_phone Name', 'Додавання телефонного номеру до контакту Name.\nКожен контакт може мати кілька номерів'],
+            'add_birthday': ['add_birthday Name', 'Додавання для контакта Name дня народження у форматі РРРР-ММ-ДД'],
+            'add_email': ['add_email Name', 'Додавання адреси електроної пошти для контакта Name'],
+            'add_address': ['add_address Name', 'Додавання адреси для контакта Name'],
+            'find_record_by_trem': ['find_record_by_trem text', "Пошук рядку 'text' у всіх полях телефонного довідника"],
             'list_book': ['list_book', 'Вивід на екран телефонного довідника'],
+            'delete_phone': ['delete_phone Name', 'Видалення номеру телефону у контакту Name'],
 
             'add_note': ['add_note', 'Додавання нотатки для контакту ____'],
-            'find_note': ['find_note', 'Пошук у нотатках рядку ____'],
+            'find_note_by_name': ['find_note_by_name', 'Пошук у нотатках за іменем ____'],
+            'find_notes_by_term': ['find_notes_by_term', 'Пошук у нотатках за будь яким терміном ____'],
             'list_note': ['list_note', 'Вивід на екран усіх нотаток'],
             'edit_note': ['edit_note', 'Коригування нотаток'],
             'delete_all_notes': ['delete_all_notes', 'Видалення усіх нотаток'],
@@ -133,7 +135,11 @@ class Record:
         self.birthday = new_birthday
 
     def remove_phone(self, phone):
-        self.phones = list(filter(lambda p: p.value != phone, self.phones))
+        if (list(filter(lambda p: p.value == phone, self.phones)) == []):
+            print (f'Телефон {phone} не існує.')
+        else:
+            self.phones = list(filter(lambda p: p.value != phone, self.phones))
+            print(f"Телефон {phone} видалений.")
 
     def edit_phone(self, old_phone, new_phone):
         for p in self.phones:
@@ -209,6 +215,7 @@ class AddressBook(UserDict):
             self.record_id, data = pickle.load(file)
             self.data.update(data)
 
+
     def find_by_term(self, term: str) -> List[Record]:
         matching_records = []
 
@@ -216,6 +223,10 @@ class AddressBook(UserDict):
             for phone in record.phones:
                 if term in phone.value:
                     matching_records.append(record)
+            if term in str (record.email):
+                matching_records.append(record)
+            if term in str (record.address):
+                matching_records.append(record)
 
         matching_records.extend(record for record in self.data.values() if term.lower() in record.name.value.lower())
         return matching_records
@@ -224,11 +235,11 @@ class AddressBook(UserDict):
 class Note(Field):
     def __init__(self, text, date, tags=None):
         super().__init__(text)
-        self.tags = tags
+        self.tags = tags if tags is not None else []
         self.date = date
 
     def add_tag(self, tag):
-        self.tags.appand(tag)
+        self.tags.append(tag)
 
     def remove_tag(self, tag):
         self.tags.remove(tag)
@@ -260,7 +271,10 @@ class NoteRecord(Record):
                 self.notes[idx] = Note(note, date, tags) 
 
     def find_notes_by_tag(self, tag):
-        return [note for note in self.notes if tag in note.teg]
+        return [note for note in self.notes if tag in note.tegs]
+    
+    def find_notes_by_term(self, term):
+        return [note for note in self.notes if term.lower() in note.value.lower() or any(term.lower() in tag.lower() for tag in note.tags)]
 
     def __str__(self):
         notes_str = " | ".join([f"{note.value} [{' ,'.join(note.tags)}]" for note in self.notes])
@@ -304,12 +318,12 @@ class Controller():
                 continue
             name = line.strip().title()
             if name in self.book:
-                print(f"Контакт з іменем {name} вже існує.")
+                print(f"Контакт з ім'ям '{name}' вже існує.")
                 return
             try:
                 record = NoteRecord(name)
                 self.book.add_record(record)
-                print(f"Контакт з іменем {name} успішно створено.")
+                print(f"Контакт з ім'ям '{name}' успішно створено.")
                 break
             except ValueError as e:
                 print(f"Помилка при створенні контакту: {e}")
@@ -319,51 +333,65 @@ class Controller():
         record = self.book.get(name.title())
 
         if not record:
-            print(f"Контакт з іменем {name} не знайдено.")
+            print(f"Контакт з ім'ям '{name}' не знайдено.")
             return
         phone = input ('Введіть номер телефону: 10 цифр:  ')
 
         try:
             record.add_phone(phone)
-            print(f"Телефон {phone} додано до контакта {name}.")
+            print(f"Телефон '{phone}' додано до контакта '{name}'.")
         except ValueError as e:
             print(f"Помилка при додаванні телефону: {e}")
+
+    def do_delete_phone(self, name):
+
+        record = self.book.get(name.title())
+
+        if not record:
+            print(f"Контакт з ім'ям '{name}' не знайдено.")
+            return
+        phone = input ('Введіть номер телефону: 10 цифр:  ')
+
+        try:
+            record.remove_phone(phone)
+        except ValueError as e:
+            print(f"Помилка при видаленні телефону: {e}")
 
     def do_add_birthday(self, name):
         name = name.title()  # Ensure that the name's first letter is capital
         record = self.book.get(name.title())
 
         if not record:
-            print(f"Контакт з іменем {name} не знайдено.")
+            print(f"Контакт з ім'ям '{name}' не знайдено.")
             return
         birthday_str = input ('Введіть дату дня народження у форматі РРРР-ММ-ДД:  ')
         try:
             record.add_birthday(birthday_str)
-            print(f"День народження {birthday_str} додано для контакта {name}.")
+            print(f"День народження {birthday_str} додано для контакта '{name}'.")
         except ValueError as e:
             print(f"Помилка при додаванні дні народження: {e}")
 
     def do_add_email(self, name):
         record = self.book.get(name.title())
         if not record:
-            print(f"Контакт з іменем {name} не знайдено.")
+            print(f"Контакт з ім'ям '{name}' не знайдено.")
             return
         email = input('Введіть email:  ')
         try:
             record.add_email(email)
-            print(f"Email {email} додано до контакта {name}.")
+            print(f"Email '{email}' додано до контакта '{name}'.")
         except IndexError as e:
             print(f"Помилка при додаванні email: {e}")
 
     def do_add_address(self, name):
         record = self.book.get(name.title())
         if not record:
-            print(f"Контакт з іменем {name} не знайдено.")
+            print(f"Контакт з ім'ям '{name}' не знайдено.")
             return
-        address = input('Введіть адрес: ')
+        address = input('Введіть адресу: ')
         try:
             record.add_address(address)
-            print(f"Адреса {address} додана до контакта {name}.")
+            print(f"Адреса '{address}' додана до контакта '{name}'.")
         except ValueError as e:
             print(f"Помилка при додаванні адреси: {e}")
 
@@ -372,16 +400,14 @@ class Controller():
             print("Адресна книга порожня.")
         else:
             table = Table(show_header=True, header_style="bold magenta")
-#            table.add_column('ID')
             table.add_column('Name')
             table.add_column("Phone")
             table.add_column("Address")
             table.add_column("Email")
-            table.add_column("Birthdays")
+            table.add_column("Birthday")
             for record_id, record in self.book.data.items():
                 phones = '; '.join(str(phone) for phone in record.phones)
                 birthday_info = record.birthday.value if record.birthday else ""
-#                print(f"{record_id}: {record.name.value}, {phones}{birthday_info}")
                 address_info = record.address.value if record.address else ""
                 email_info = record.email.value if record.email else ""
                 table.add_row(record.name.value, phones, address_info, email_info, birthday_info)
@@ -392,7 +418,7 @@ class Controller():
         if not self.book.data:
             print("Адресна книга порожня.")
         else:
-            table = Table(show_header=True, header_style="bold magenta")
+            table = Table(show_header=True, header_style="bold yellow")
             table.add_column('Author')
             table.add_column("Note")
             table.add_column("Tag")
@@ -404,16 +430,49 @@ class Controller():
                         table.add_section()
             console.print(table)
 
-    def do_find_info(self, line):
+    def do_find_record_by_trem(self, line):
         matching_records = self.book.find_by_term(line)
+        table = Table(show_header=True, header_style="bold magenta")
+        table.add_column('Name')
+        table.add_column("Phone")
+        table.add_column("Address")
+        table.add_column("Email")
+        table.add_column("Birthday")
         if matching_records:
             for record in matching_records:
-                phones = ", ".join(phone.value for phone in record.phones)
-                birthday_info = f", День народження: {record.birthday.value}" if record.birthday else ""
-                print(f" {record.name.value}, {phones}{birthday_info}")
+                phones = '; '.join(str(phone) for phone in record.phones)
+                birthday_info = record.birthday.value if record.birthday else ""
+                address_info = record.address.value if record.address else ""
+                email_info = record.email.value if record.email else ""
+                table.add_row(record.name.value, phones, address_info, email_info, birthday_info)
+                table.add_section()
+            console.print(table)
         else:
-            print("Ничего не найдено!!!.")
-
+            print("Даних із таким текстом не існує!!!.")
+    
+    def do_find_notes_by_term(self, term):
+        term = term.strip().lower()
+        table = Table(show_header=True, header_style="bold yellow")
+        table.add_column('Name')
+        table.add_column('Note')
+        table.add_column('Date')
+        table.add_column('Tags')
+        
+        found_notes = False
+        for name, record in self.book.data.items():
+            if isinstance(record, NoteRecord):
+                matching_notes = record.find_notes_by_term(term)
+                for note in matching_notes:
+                    tag_string = ', '.join(note.tags) if note.tags else ''
+                    table.add_row(name, note.value, note.date, tag_string)
+                    found_notes = True
+        
+        console = Console()
+        if found_notes:
+            console.print(table)
+        else:
+            print("Даних із таким текстом не існує!!!.")
+    
     def do_days_to_birthday(self, line, when=9999): # >>>birthday John (до дня народження контакту John, залишилось 354 днів)
         name = line.strip().title()
         record = self.book.find(name)
@@ -428,7 +487,7 @@ class Controller():
             else:
                 print(f"День народження не додано в книгу контактів")
         else:
-            print(f"контакт {name} не знайдений")
+            print(f"Контакт '{name}' не знайдений")
             
     def do_when (self, days):
         if not days:
@@ -444,27 +503,27 @@ class Controller():
         name_normal = name.strip().title()
         record = self.book.data.get(name_normal)
         if record is None:
-            print(f"Контакт з ім'ям {name_normal} не знайдено.")
+            print(f"Контакт з ім'ям '{name_normal}' не знайдено.")
             return
         if not isinstance(record, NoteRecord):
-            print(f"Для контакта {name_normal} не підтримуються нотатки.")
+            print(f"Для контакта '{name_normal}' не підтримуються нотатки.")
             return
         note_text = input('Введіть нотатку: ')
         tags = input('Введіть теги: ')
         record.add_note(note_text, tags)
         print(f"Заметка додана до контакта {name_normal}.")
 
-    def do_find_note(self, line):
+    def do_find_note_by_name(self, line):
         name = line.strip().title()
         record = self.book.data.get(name)
         if not record:
-            print(f"Контакт з ім'ям {name} не знайдено.")
+            print(f"Контакт з ім'ям '{name}' не знайдено.")
             return
         if isinstance(record, NoteRecord) and record.notes:
             for note in record.notes:
                 print(f"{name}: {note.value} [Tags: {''.join(note.tags)}]")
         else:
-            print(f"Для контакта {name} не знайдено нотаток або вони не підтримуються.")
+            print(f"Для контакта '{name}' не знайдено нотаток або вони не підтримуються.")
 
     def do_delete_all_notes(self, line):
         name = input("Введіть ім'я для видалення всіх нотаток: ")
@@ -473,7 +532,7 @@ class Controller():
             record = self.book[name_normal]
             if isinstance(record, NoteRecord):
                 record.notes.clear()
-                print(f"Усі нотатки для {name_normal} було видалено.")
+                print(f"Усі нотатки для '{name_normal}' було видалено.")
             else:
                 print("Для цього контакта нотатки не підтримуються.")
         else:
@@ -485,10 +544,10 @@ class Controller():
         name = line.strip().title()
         record = self.book.data.get(name)
         if record is None:
-            print(f"Контакт з ім'ям {name} не знайдено.")
+            print(f"Контакт з ім'ям '{name}' не знайдено.")
             return
         new_text= input("Введіть нову нотатку: ")
-        new_tags = input("Введіть нови тег: ")
+        new_tags = input("Введіть новий тег: ")
         record.edit_note(new_text, new_tags)
         print("Примітка успішно відредагована.")
 
@@ -512,15 +571,20 @@ class CommandValidator(Validator):
 #            if (not x[2].isdigit()):
 #                raise ValidationError(message='Телефон повинен складатися з цифр', cursor_position=len(text))
 
+        if text.startswith("delete_phone"):
+            x = text.split(" ")
+            if len(x) != 2:
+                raise ValidationError(message="Введіть: <Ім'я>", cursor_position=len(text))
+
         if text.startswith("add_birthday"):
             x = text.split(" ")
             if len(x) != 2:
                 raise ValidationError(message="Введіть: <Ім'я>", cursor_position=len(text))
 
-        if text.startswith("find_info"):
+        if text.startswith("find_record_by_trem"):
             x = text.split(" ")
             if len(x) == 1:
-                raise ValidationError(message="Введіть: <Ім'я> для пошуку", cursor_position=len(text))
+                raise ValidationError(message="Введіть: будь який термін для пошуку", cursor_position=len(text))
 
         if text.startswith("days_to_birthday"):
             x = text.split(" ")
@@ -532,12 +596,22 @@ class CommandValidator(Validator):
             if len(x) != 2:
                 raise ValidationError(message="Введіть: кількість днів для пошуку", cursor_position=len(text))
 
+        if text.startswith("sort_files"):
+            x = text.split(" ")
+            if len(x) != 2:
+                raise ValidationError(message="Введіть: шлях до папки, яку треба сортувати", cursor_position=len(text))
+
         if text.startswith("add_note"):
             x = text.split(" ")
             if len(x) != 2:
                 raise ValidationError(message="Введіть: <Ім'я>", cursor_position=len(text))
 
-        if text.startswith("find_note"):
+        if text.startswith("find_note_by_name"):
+            x = text.split(" ")
+            if len(x) != 2:
+                raise ValidationError(message="Введіть: <Ім'я> для пошуку", cursor_position=len(text))
+            
+        if text.startswith("find_notes_by_term"):
             x = text.split(" ")
             if len(x) != 2:
                 raise ValidationError(message="Введіть: <Ім'я> для пошуку", cursor_position=len(text))
@@ -571,6 +645,9 @@ def handle_command(command):
     elif command.lower().startswith("add_phone"):
         _, name = command.split(" ")
         return controller.do_add_phone(name)
+    elif command.lower().startswith("delete_phone"):
+        _, name = command.split(" ")
+        return controller.do_delete_phone(name)
     elif command.lower().startswith("add_email"):
         _, line = command.split(" ")
         return controller.do_add_email(line)
@@ -586,21 +663,30 @@ def handle_command(command):
         return controller.do_load()
     elif command.lower().startswith("list_note"):
         return controller.do_list_note()
-    elif command.lower().startswith("find_info"):
+    elif command.lower().startswith("find_record_by_trem"):
         _, line = command.split(" ")
-        return controller.do_find_info(line)
+        return controller.do_find_record_by_trem(line)
     elif command.lower().startswith("days_to_birthday"):
         _, name = command.split(" ")
         return controller.do_days_to_birthday(name)
     elif command.lower().startswith("when"):
         _, name = command.split(" ")
         return controller.do_when(name)
+    elif command.lower().startswith("sort_files"):
+        _, name = command.split(" ")
+        return controller.do_sort_files(name)
     elif command.lower().startswith("add_note"):
         _, name = command.split(" ")
         return controller.do_add_note(name)
-    elif command.lower().startswith("find_note"):
+    
+    elif command.lower().startswith("find_note_by_name"):
         _, name = command.split(" ")
-        return controller.do_find_note(name)
+        return controller.do_find_note_by_name(name)
+    
+    elif command.lower().startswith("find_notes_by_term"):
+        _, name = command.split(" ")
+        return controller.do_find_notes_by_term(name)
+    
     elif command.lower().startswith("edit_note"):
          _, name = command.split(" ")
          return controller.do_edit_note(name)
