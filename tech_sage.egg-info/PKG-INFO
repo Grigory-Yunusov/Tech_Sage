@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: tech-sage
+Version: 1.0.0
+Summary: Address Book, Notebook, Sorter
+Home-page: https://github.com/Grigory-Yunusov/Tech_Sage
+Author: ['Andrey Samoylenko', 'Grigory Yunusov', 'Gulyaeva Kristina', 'Ievgen Sharnin', 'Kostiantyn Kosorotov']
+Author-email: 
+License: as authors
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+License-File: LICENSE
+Requires-Dist: prompt_toolkit
+Requires-Dist: rich

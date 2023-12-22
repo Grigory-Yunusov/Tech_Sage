@@ -1,0 +1,15 @@
+LICENSE
+MANIFEST.in
+README.md
+setup.py
+tech_sage/__init__.py
+tech_sage/adress_book_1.pkl
+tech_sage/main.py
+tech_sage/normalize_for_sort.py
+tech_sage/sort_files.py
+tech_sage.egg-info/PKG-INFO
+tech_sage.egg-info/SOURCES.txt
+tech_sage.egg-info/dependency_links.txt
+tech_sage.egg-info/entry_points.txt
+tech_sage.egg-info/requires.txt
+tech_sage.egg-info/top_level.txt
