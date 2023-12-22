@@ -310,7 +310,7 @@ class Controller():
         print("Адресна книга відновлена")
 
     def do_help(self):
-        table = Table(show_header=True, header_style="bold magenta")
+        table = Table(show_header=True, header_style="bold blue", border_style='bold green')
         table.add_column('Синтаксис команди')
         table.add_column('Опис')
 
@@ -461,7 +461,7 @@ class Controller():
         if not self.book.data:
             print("Адресна книга порожня.")
         else:
-            table = Table(show_header=True, header_style="bold magenta")
+            table = Table(show_header=True, header_style="bold magenta", border_style='bold violet')
             table.add_column('Name')
             table.add_column("Phone")
             table.add_column("Address")
@@ -480,7 +480,7 @@ class Controller():
         if not self.book.data:
             print("Адресна книга порожня.")
         else:
-            table = Table(show_header=True, header_style="bold yellow")
+            table = Table(show_header=True, header_style="bold cyan", border_style='bold yellow')
             table.add_column('Author')
             table.add_column("Note")
             table.add_column("Tag")
@@ -494,7 +494,7 @@ class Controller():
 
     def do_find_record_by_trem(self, line):
         matching_records = self.book.find_by_term(line)
-        table = Table(show_header=True, header_style="bold magenta")
+        table = Table(show_header=True, header_style="bold red", border_style='bold yellow')
         table.add_column('Name')
         table.add_column("Phone")
         table.add_column("Address")
@@ -514,7 +514,7 @@ class Controller():
     
     def do_find_notes_by_term(self, term):
         term = term.strip().lower()
-        table = Table(show_header=True, header_style="bold yellow")
+        table = Table(show_header=True, header_style="bold cyan", border_style='bold yellow')
         table.add_column('Name')
         table.add_column('Note')
         table.add_column('Date')
@@ -537,9 +537,9 @@ class Controller():
     
     def do_days_to_birthday(self, line, when=9999): # >>>birthday John (до дня народження контакту John, залишилось 354 днів)
         if when == 9999:
-            table = Table(show_header=True, header_style="bold magenta")
+            table = Table(show_header=True, header_style="bold magenta", border_style='bold violet')
         else:
-            table = Table(show_header=False, header_style="bold magenta")
+            table = Table(show_header=False, header_style="bold magenta", border_style='bold violet')
         table.add_column('Name')
         table.add_column("Phone")
         table.add_column("Email")
@@ -575,7 +575,7 @@ class Controller():
             print(f"Контакт '{name}' не знайдений")
             
     def do_when (self, days):
-        table = Table(show_header=True, header_style="bold magenta")
+        table = Table(show_header=True, header_style="bold magenta", border_style='bold violet')
         table.add_column('Name')
         table.add_column("Phone")
         table.add_column("Email")
@@ -623,7 +623,7 @@ class Controller():
         if not record:
             print(f"Контакт з ім'ям '{name}' не знайдено.")
             return
-        table = Table(show_header=True, header_style="bold yellow")
+        table = Table(show_header=True, header_style="bold cyan", border_style='bold yellow')
         table.add_column('Name')
         table.add_column('Note')
         table.add_column('Date')
