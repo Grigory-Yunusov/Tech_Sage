@@ -1,7 +1,7 @@
 import sys
 import shutil
 from pathlib import Path
-from normalize_for_sort import normalize
+from .normalize_for_sort import normalize
 from rich.console import Console
 from rich.table import Table
 
@@ -43,7 +43,6 @@ def filetype (suffix):
 # працює, якщо відповідаємо 'у' після першого прогону
 # action 'new' створює, action 'del' удаляє 
 def work_with_directories (path_: Path, action):
-    from normalize_for_sort import normalize
     if action == 'new':
         for dir in path_.iterdir(): #ім'я папки нормалізую
             if dir.is_dir():
@@ -64,7 +63,6 @@ def work_with_directories (path_: Path, action):
 # з нормалізацією та переміщенням
 # перший прогон - тільки для інформації скільки і чого є 
 def sorting (path_, action = False):
-    from normalize_for_sort import normalize
     for file in path_.iterdir(): #ім'я файлу з розширенням
         if file.is_dir():
             if action:
@@ -93,25 +91,14 @@ def run (line):
     table = Table (show_header=True)
     print ('')
     print (f'Вміст папки: {PATH}')
-#    print ('|{:-^15}|{:-^10}|'.format ('-', '-'))
-#    print ('|{:^15}|{:^10}|'.format ('Типи файлів', 'Кількість'))
     table.add_column ('Типи файлів')
     table.add_column ('Кількість')
-#    print ('|{:-^15}|{:-^10}|'.format ('-', '-'))
-#    print ('|{:<15}|{:^10}|'.format ('Зображення', all_files.count('images')))
     table.add_row ('Зображення', str (all_files.count('images')))
-#    print ('|{:<15}|{:^10}|'.format ('Відео', all_files.count('video')))
     table.add_row ('Відео', str (all_files.count('video')))
-#    print ('|{:<15}|{:^10}|'.format ('Документи', all_files.count('documents')))
     table.add_row ('Документи', str (all_files.count('documents')))
-#    print ('|{:<15}|{:^10}|'.format ('Музика', all_files.count('audio')))
     table.add_row ('Музика', str (all_files.count('audio')))
-#    print ('|{:<15}|{:^10}|'.format ('Архіви', all_files.count('archives')))
     table.add_row ('Архіви', str (all_files.count('archives')))
-#    print ('|{:<15}|{:^10}|'.format ('Інші типи', all_files.count('other')))
     table.add_row ('Інші типи', str (all_files.count('other')))
-#    print ('|{:-^15}|{:-^10}|'.format ('-', '-'))
-#    print ('|{:<15}|{:^10}|'.format ('Разом', len (all_files)))
     table.add_row ('Разом', str (len (all_files)))
     console.print (table)
     print ('')
