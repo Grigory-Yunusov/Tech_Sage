@@ -840,6 +840,7 @@ def handle_command(command):
 def main():
     controller.do_load()
     print("Ласкаво просимо до Адресної Книги")
+    controller.do_when('0')
 
     while True:
         commands_for_interp = {}
